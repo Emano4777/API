@@ -13,9 +13,7 @@ app.get('/api/pesquisar_bula', async (req, res) => {
 
   try {
     console.log(`Buscando medicamento: ${nomeMedicamento}`);
-    console.time('Tempo de execução de pesquisa');
     const resultado = await pesquisar(nomeMedicamento);
-    console.timeEnd('Tempo de execução de pesquisa');
 
     if (resultado && resultado.content && resultado.content.length > 0) {
       const medicamento = resultado.content[0];
@@ -48,8 +46,11 @@ app.get('/api/baixar_pdf', async (req, res) => {
   }
 
   try {
-    const pdfUrl = await getPdfUrl(idBulaPacienteProtegido);
-    return res.redirect(pdfUrl);
+    const { url, erro } = await getPdfUrl(idBulaPacienteProtegido);
+    if (erro) {
+      return res.status(202).json({ mensagem: erro, link: url });
+    }
+    return res.redirect(url);
   } catch (err) {
     console.error('Erro ao tentar obter o PDF:', err);
     return res.status(500).json({ erro: 'Erro ao tentar obter o PDF da bula' });

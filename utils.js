@@ -36,14 +36,13 @@ async function getPdfUrl(idBulaP_Protegido) {
   if (response.status !== 200) {
     const responseBody = await response.json();
     if (responseBody.error && responseBody.error.includes("JWT must not be accepted")) {
-      // Aguarde alguns segundos e tente novamente
-      await new Promise(resolve => setTimeout(resolve, 5000)); // Aguarda 5 segundos
-      return await getPdfUrl(idBulaP_Protegido); // Recursivamente tenta novamente
+      // Retorna o erro, mas não tenta novamente
+      return { erro: 'PDF não disponível. Tente mais tarde.', url };
     }
     throw new Error('Erro ao baixar o PDF');
   }
 
-  return url; // Retorna o link do PDF
+  return { url }; // Retorna o link do PDF
 }
 
 // Função para pesquisar medicamentos
