@@ -4,6 +4,8 @@ const { pesquisar, getPdfUrl } = require('./utils');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.static(path.join(__dirname, 'public')));
+
 // Rota para pesquisar o medicamento e gerar o link para download do PDF
 app.get('/api/pesquisar_bula', async (req, res) => {
   const nomeMedicamento = req.query.nome;
