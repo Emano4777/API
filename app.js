@@ -6,7 +6,7 @@ const { pesquisar, getPdf } = require('./utils');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Rota para pesquisar o medicamento e salvar o PDF
+// Rota para pesquisar o medicamento e salvar o PDF no diretório temporário
 app.get('/api/pesquisar_bula', async (req, res) => {
   const nomeMedicamento = req.query.nome;
   if (!nomeMedicamento) {
@@ -16,7 +16,6 @@ app.get('/api/pesquisar_bula', async (req, res) => {
   try {
     console.log(`Buscando medicamento: ${nomeMedicamento}`);
     const resultado = await pesquisar(nomeMedicamento);
-    console.log('Resposta da API de pesquisa:', JSON.stringify(resultado, null, 2));
 
     if (resultado && resultado.content && resultado.content.length > 0) {
       const medicamento = resultado.content[0];
@@ -33,7 +32,7 @@ app.get('/api/pesquisar_bula', async (req, res) => {
         }
 
         // Define o caminho para salvar o PDF temporariamente
-        const pdfPath = path.resolve('/tmp', `${nomeMedicamento}.pdf`);  // No Vercel, use '/tmp' para arquivos temporários
+        const pdfPath = path.resolve('/tmp', `${nomeMedicamento}.pdf`);
         fs.writeFileSync(pdfPath, bulaPdf);
         console.log(`PDF da bula salvo em: ${pdfPath}`);
         
@@ -51,11 +50,12 @@ app.get('/api/pesquisar_bula', async (req, res) => {
   }
 });
 
-// Rota para baixar o PDF após a pesquisa
+// Rota para baixar o PDF já salvo no diretório temporário
 app.get('/api/baixar_pdf', (req, res) => {
   const nomeMedicamento = req.query.nome;
   const pdfPath = path.resolve('/tmp', `${nomeMedicamento}.pdf`);
 
+  // Verifica se o arquivo existe no diretório temporário
   if (!fs.existsSync(pdfPath)) {
     return res.status(404).json({ erro: 'PDF não encontrado. Talvez o arquivo ainda não tenha sido gerado.' });
   }
