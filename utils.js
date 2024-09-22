@@ -31,11 +31,12 @@ function headers() {
 async function getPdf(idBulaP_Protegido) {
     console.log(`Tentando baixar o PDF para o ID: ${idBulaP_Protegido}`);
 
-    const response = await fetch(`https://consultas.anvisa.gov.br/api/consulta/medicamentos/arquivo/bula/parecer/${idBulaP_Protegido}/?Authorization=Guest`, {
+    const response = await fetch(`https://consultas.anvisa.gov.br/api/consulta/bulario?filter[nomeProduto]=${encodeURIComponent(nomeProduto)}`, {
         method: "GET",
         agent: new https.Agent({ rejectUnauthorized: false }),
         headers: headers()
     });
+    
 
     console.log(`Status da resposta: ${response.status}`);
     
