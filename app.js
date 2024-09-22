@@ -20,6 +20,7 @@ app.get('/api/pesquisar_bula', async (req, res) => {
       const idBulaPacienteProtegido = medicamento.idBulaPacienteProtegido;
 
       if (idBulaPacienteProtegido) {
+        // Retorna imediatamente o link para o PDF, sem esperar
         const pdfUrl = `/api/baixar_pdf?id=${idBulaPacienteProtegido}`;
         return res.json({
           medicamento: medicamento.nomeProduto,
@@ -48,8 +49,10 @@ app.get('/api/baixar_pdf', async (req, res) => {
   try {
     const { url, erro } = await getPdfUrl(idBulaPacienteProtegido);
     if (erro) {
+      // O PDF não está pronto, retorna um erro 202
       return res.status(202).json({ mensagem: erro, link: url });
     }
+    // Redireciona para o link do PDF
     return res.redirect(url);
   } catch (err) {
     console.error('Erro ao tentar obter o PDF:', err);

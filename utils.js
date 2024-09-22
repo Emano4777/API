@@ -26,7 +26,7 @@ function headers() {
 async function getPdfUrl(idBulaP_Protegido) {
   const url = `https://consultas.anvisa.gov.br/api/consulta/medicamentos/arquivo/bula/parecer/${idBulaP_Protegido}/?Authorization=Guest`;
 
-  // Verifica se o PDF está disponível
+  // Tenta buscar o PDF
   const response = await fetch(url, {
     method: 'GET',
     agent: new https.Agent({ rejectUnauthorized: false }),
@@ -36,10 +36,10 @@ async function getPdfUrl(idBulaP_Protegido) {
   if (response.status !== 200) {
     const responseBody = await response.json();
     if (responseBody.error && responseBody.error.includes("JWT must not be accepted")) {
-      // Retorna o erro, mas não tenta novamente
+      // Retorna mensagem informando que o PDF não está pronto ainda
       return { erro: 'PDF não disponível. Tente mais tarde.', url };
     }
-    throw new Error('Erro ao baixar o PDF');
+    throw new Error('Erro ao tentar baixar o PDF');
   }
 
   return { url }; // Retorna o link do PDF
