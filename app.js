@@ -1,8 +1,12 @@
-const { pesquisar, getPdf } = require('./utils');
+const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const { pesquisar, getPdf } = require('./utils');
 
-module.exports = async (req, res) => {
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/api/pesquisar_bula', async (req, res) => {
   const nomeMedicamento = req.query.nome;
   if (!nomeMedicamento) {
     return res.status(400).json({ erro: 'Nome do medicamento é obrigatório' });
@@ -11,7 +15,8 @@ module.exports = async (req, res) => {
   try {
     console.log(`Buscando medicamento: ${nomeMedicamento}`);
     const resultado = await pesquisar(nomeMedicamento);
-    console.log('Resposta da API de pesquisa:', JSON.stringify(resultado, null, 2));
+console.log('Resposta da API de pesquisa:', JSON.stringify(resultado, null, 2));
+
 
     if (resultado && resultado.content && resultado.content.length > 0) {
       const medicamento = resultado.content[0];
@@ -19,6 +24,7 @@ module.exports = async (req, res) => {
 
       if (idBulaPacienteProtegido) {
         console.log(`ID da bula do paciente: ${idBulaPacienteProtegido}`);
+
         const bulaPdf = await getPdf(idBulaPacienteProtegido);
 
         if (!bulaPdf || bulaPdf.length === 0) {
@@ -26,7 +32,12 @@ module.exports = async (req, res) => {
           return res.status(500).json({ erro: "Falha ao baixar o PDF. O arquivo está vazio." });
         }
 
-        const pdfPath = path.resolve('/tmp', `${nomeMedicamento}.pdf`);
+        const pdfPath = path.resolve(__dirname, 'bulas', `${nomeMedicamento}.pdf`);
+        const dir = path.resolve(__dirname, 'bulas');
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+        }
+
         fs.writeFileSync(pdfPath, bulaPdf);
         console.log(`PDF da bula salvo em: ${pdfPath}`);
         return res.json({ mensagem: `PDF da bula salvo com sucesso em: ${pdfPath}` });
@@ -40,4 +51,8 @@ module.exports = async (req, res) => {
     console.error('Erro no servidor:', err);
     return res.status(500).json({ erro: 'Erro no servidor' });
   }
-};
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+});
