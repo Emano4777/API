@@ -40,3 +40,4 @@ app.get('/api/pesquisar_bula', async (req, res) => {
     return res.status(500).json({ erro: 'Erro no servidor' });
   }
 });
+module.exports = app;
