@@ -6,7 +6,6 @@ const { pesquisar, getPdf } = require('./utils');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Rota para pesquisar o medicamento e salvar o PDF no diretório temporário
 app.get('/api/pesquisar_bula', async (req, res) => {
   const nomeMedicamento = req.query.nome;
   if (!nomeMedicamento) {
@@ -31,14 +30,10 @@ app.get('/api/pesquisar_bula', async (req, res) => {
           return res.status(500).json({ erro: "Falha ao baixar o PDF. O arquivo está vazio." });
         }
 
-        // Define o caminho para salvar o PDF temporariamente
-        const pdfPath = path.resolve('/tmp', `${nomeMedicamento}.pdf`);
-        console.log(`Salvando o PDF em: ${pdfPath}`);
-        fs.writeFileSync(pdfPath, bulaPdf);
-        console.log(`PDF da bula salvo em: ${pdfPath}`);
-        
-        // Retorna o caminho para download do PDF
-        return res.json({ mensagem: `PDF da bula salvo com sucesso`, pdfUrl: `/api/baixar_pdf?nome=${nomeMedicamento}` });
+        // Configura os headers para baixar o PDF diretamente
+        res.setHeader('Content-Disposition', `attachment; filename=${nomeMedicamento}.pdf`);
+        res.setHeader('Content-Type', 'application/pdf');
+        return res.send(bulaPdf); // Envia o PDF diretamente na resposta
       } else {
         return res.status(404).json({ erro: 'Bula não encontrada para o medicamento' });
       }
