@@ -1,10 +1,16 @@
 {
     "version": 2,
     "builds": [
-      { "src": "api/pesquisar_bula.js", "use": "@vercel/node" }
+      {
+        "src": "app.js", 
+        "use": "@vercel/node"
+      }
     ],
     "routes": [
-      { "src": "/api/pesquisar_bula", "dest": "/api/pesquisar_bula.js" }
+      {
+        "src": "/api/pesquisar_bula", 
+        "dest": "/app.js"
+      }
     ]
   }
   
