@@ -1,7 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
-const { pesquisar, getPdf } = require('./utils');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,8 +14,9 @@ app.get('/api/pesquisar_bula', async (req, res) => {
 
   try {
     console.log(`Buscando medicamento: ${nomeMedicamento}`);
+    console.time('Tempo de execução de pesquisa');
     const resultado = await pesquisar(nomeMedicamento);
-
+    console.timeEnd('Tempo de execução de pesquisa');
     if (resultado && resultado.content && resultado.content.length > 0) {
       const medicamento = resultado.content[0];
       const idBulaPacienteProtegido = medicamento.idBulaPacienteProtegido;

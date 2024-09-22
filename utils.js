@@ -27,34 +27,11 @@ function headers() {
     };
 }
 
-// Função para baixar o PDF da bula sem autenticação por token
-async function getPdf(idBulaP_Protegido) {
-    console.log(`Tentando baixar o PDF para o ID: ${idBulaP_Protegido}`);
 
-    const response = await fetch(`https://consultas.anvisa.gov.br/api/consulta/bulario?filter[nomeProduto]=${encodeURIComponent(nomeProduto)}`, {
-        method: "GET",
-        agent: new https.Agent({ rejectUnauthorized: false }),
-        headers: headers()
-    });
-    
-
-    console.log(`Status da resposta: ${response.status}`);
-    
-    if (response.status !== 200) {
-        console.error(`Erro ao baixar o PDF. Status: ${response.status}`);
-        const responseBody = await response.text();
-        console.error(`Conteúdo da resposta: ${responseBody}`);
-        return null;
-    }
-
-    const bula = await response.buffer();
-    console.log(`Tamanho do PDF baixado: ${bula.length} bytes`);
-    return bula;
-}
 
 // Função para pesquisar medicamentos
 async function pesquisar(nomeProduto, pagina = 1) {
-    const response = await fetch(`https://consultas.anvisa.gov.br/api/consulta/bulario?count=10&filter[nomeProduto]=${encodeURIComponent(nomeProduto)}&page=${pagina}`, {
+    const response = await fetch(`https://consultas.anvisa.gov.br/api/consulta/bulario?count=1&filter[nomeProduto]=${encodeURIComponent(nomeProduto)}&page=${pagina}`, {
         method: "GET",
         agent: new https.Agent({ rejectUnauthorized: false }),
         headers: headers()
@@ -65,6 +42,5 @@ async function pesquisar(nomeProduto, pagina = 1) {
 }
 
 module.exports = {
-    getPdf,
     pesquisar
 };
