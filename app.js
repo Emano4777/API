@@ -1,13 +1,13 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const { pesquisar, getPdf } = require('./utils');
+const { pesquisar, getPdfUrl } = require('./utils');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Rota para pesquisar o medicamento e gerar o link para download do PDF
 app.get('/api/pesquisar_bula', async (req, res) => {
   const nomeMedicamento = req.query.nome;
+
   if (!nomeMedicamento) {
     return res.status(400).json({ erro: 'Nome do medicamento é obrigatório' });
   }
@@ -21,19 +21,14 @@ app.get('/api/pesquisar_bula', async (req, res) => {
       const idBulaPacienteProtegido = medicamento.idBulaPacienteProtegido;
 
       if (idBulaPacienteProtegido) {
-        console.log(`ID da bula do paciente: ${idBulaPacienteProtegido}`);
-
-        const bulaPdf = await getPdf(idBulaPacienteProtegido);
-
-        if (!bulaPdf || bulaPdf.length === 0) {
-          console.error("Erro: O PDF retornado está vazio ou corrompido.");
-          return res.status(500).json({ erro: "Falha ao baixar o PDF. O arquivo está vazio." });
-        }
-
-        // Configura os headers para baixar o PDF diretamente
-        res.setHeader('Content-Disposition', `attachment; filename=${nomeMedicamento}.pdf`);
-        res.setHeader('Content-Type', 'application/pdf');
-        return res.send(bulaPdf); // Envia o PDF diretamente na resposta
+        // Gera o link para o PDF sem precisar salvar localmente
+        const pdfUrl = `https://consultas.anvisa.gov.br/api/consulta/medicamentos/arquivo/bula/parecer/${idBulaPacienteProtegido}/?Authorization=Guest`;
+        
+        return res.json({
+          medicamento: medicamento.nomeProduto,
+          pdfUrl: pdfUrl, // URL gerada para download
+          mensagem: `Clique no botão abaixo para baixar a bula`
+        });
       } else {
         return res.status(404).json({ erro: 'Bula não encontrada para o medicamento' });
       }
@@ -44,28 +39,6 @@ app.get('/api/pesquisar_bula', async (req, res) => {
     console.error('Erro no servidor:', err);
     return res.status(500).json({ erro: 'Erro no servidor' });
   }
-});
-
-// Rota para baixar o PDF já salvo no diretório temporário
-app.get('/api/baixar_pdf', (req, res) => {
-  const nomeMedicamento = req.query.nome;
-  const pdfPath = path.resolve('/tmp', `${nomeMedicamento}.pdf`);
-  
-  console.log(`Tentando acessar o PDF no caminho: ${pdfPath}`);
-
-  // Verifica se o arquivo existe no diretório temporário
-  if (!fs.existsSync(pdfPath)) {
-    console.error(`PDF não encontrado: ${pdfPath}`);
-    return res.status(404).json({ erro: 'PDF não encontrado. Talvez o arquivo ainda não tenha sido gerado.' });
-  }
-
-  // Configura os headers para baixar o PDF
-  res.setHeader('Content-Disposition', `attachment; filename=${nomeMedicamento}.pdf`);
-  res.setHeader('Content-Type', 'application/pdf');
-  
-  // Faz o streaming do arquivo PDF
-  const fileStream = fs.createReadStream(pdfPath);
-  fileStream.pipe(res);
 });
 
 app.listen(PORT, () => {

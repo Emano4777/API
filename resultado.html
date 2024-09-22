@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Bula</title>
+</head>
+<body>
+  <div id="resultado"></div>
+
+  <script>
+    async function buscarBula(nomeMedicamento) {
+      const response = await fetch(`/api/pesquisar_bula?nome=${encodeURIComponent(nomeMedicamento)}`);
+      const data = await response.json();
+
+      if (data.pdfUrl) {
+        document.getElementById('resultado').innerHTML = `
+          <h3>${data.medicamento}</h3>
+          <p>${data.mensagem}</p>
+          <a href="${data.pdfUrl}" target="_blank" download="${data.medicamento}.pdf">
+            <button>Baixar Bula</button>
+          </a>
+        `;
+      } else {
+        document.getElementById('resultado').innerHTML = `<p>${data.erro}</p>`;
+      }
+    }
+
+    // Chame essa função com o nome do medicamento desejado
+    buscarBula('dorflex');
+  </script>
+</body>
+</html>
