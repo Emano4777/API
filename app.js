@@ -33,6 +33,7 @@ app.get('/api/pesquisar_bula', async (req, res) => {
 
         // Define o caminho para salvar o PDF temporariamente
         const pdfPath = path.resolve('/tmp', `${nomeMedicamento}.pdf`);
+        console.log(`Salvando o PDF em: ${pdfPath}`);
         fs.writeFileSync(pdfPath, bulaPdf);
         console.log(`PDF da bula salvo em: ${pdfPath}`);
         
@@ -54,9 +55,12 @@ app.get('/api/pesquisar_bula', async (req, res) => {
 app.get('/api/baixar_pdf', (req, res) => {
   const nomeMedicamento = req.query.nome;
   const pdfPath = path.resolve('/tmp', `${nomeMedicamento}.pdf`);
+  
+  console.log(`Tentando acessar o PDF no caminho: ${pdfPath}`);
 
   // Verifica se o arquivo existe no diretório temporário
   if (!fs.existsSync(pdfPath)) {
+    console.error(`PDF não encontrado: ${pdfPath}`);
     return res.status(404).json({ erro: 'PDF não encontrado. Talvez o arquivo ainda não tenha sido gerado.' });
   }
 
